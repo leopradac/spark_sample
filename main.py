@@ -13,6 +13,15 @@ def get_dataframes(spk):
     return process_df, translation_df, client_rest_df, ccpa_df
 
 
+def join_and_get_ids(main_df, df_to_join_with):
+    return (
+        main_df
+        .join(df_to_join_with, main_df.pii == df_to_join_with.pii, 'left')
+        .select('id', main_df.pii, main_df.type, main_df.flag)
+        .filter("id is not null")
+    )
+
+
 def overwrite_flag(final_df, source_df):
     return (
         final_df
@@ -29,22 +38,12 @@ def overwrite_flag(final_df, source_df):
 def execute_challenge():
     spark = SparkSession.builder.master("local").appName("challenge_2").getOrCreate()
     process_df, translation_df, client_rest_df, ccpa_df = get_dataframes(spark)
-    client_rest_df = (
-        client_rest_df
-        .join(translation_df, client_rest_df.pii == translation_df.pii, 'left')
-        .select('id', client_rest_df.pii, client_rest_df.type, client_rest_df.flag)
-        .filter("id is not null")
-    )
-    ccpa_df = (
-        ccpa_df
-        .join(translation_df, ccpa_df.pii == translation_df.pii, 'left')
-        .withColumn('flag', lit(1))
-        .select('id', ccpa_df.pii, ccpa_df.type, 'flag')
-        .filter("id is not null")
-    )
+    client_rest_df = join_and_get_ids(client_rest_df, translation_df)
+    ccpa_df = ccpa_df.withColumn('flag', lit(1))
+    ccpa_df = join_and_get_ids(ccpa_df, translation_df)
     process_df = overwrite_flag(process_df, client_rest_df)
     process_df = overwrite_flag(process_df, ccpa_df)
-    process_df.show()
+    process_df.distinct().sort(process_df.id).show()
 
 
 if __name__ == '__main__':
