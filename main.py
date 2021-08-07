@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import when, lit, split, explode, regexp_replace, udf, trim, lower, col
+from pyspark.sql.functions import when, lit, col
 
 from schemas import process_schema, translation_schema, client_restrictions_schema, ccpa_schema
 
