@@ -36,6 +36,7 @@ def overwrite_flag(final_df, source_df):
 
 
 def execute_challenge():
+    print('RUNNING')
     spark = SparkSession.builder.master("local").appName("challenge_2").getOrCreate()
     process_df, translation_df, client_rest_df, ccpa_df = get_dataframes(spark)
     client_rest_df = join_and_get_ids(client_rest_df, translation_df)
@@ -43,7 +44,9 @@ def execute_challenge():
     ccpa_df = join_and_get_ids(ccpa_df, translation_df)
     process_df = overwrite_flag(process_df, client_rest_df)
     process_df = overwrite_flag(process_df, ccpa_df)
-    process_df.distinct().sort(process_df.id).show()
+    final_result = process_df.distinct().sort(process_df.id)
+    final_result.show()
+    return final_result
 
 
 if __name__ == '__main__':
