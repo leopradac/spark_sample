@@ -1,23 +1,24 @@
 import pytest
-from pyspark.sql import SparkSession
 
-from main import execute_challenge, get_dataframes, join_and_get_ids, overwrite_flag
-from pyspark.sql.functions import when, lit, col
+from main import execute_challenge
 
 
-# def test_challenge():
-#     df = execute_challenge()
-#     assert df is not None
+def test_challenge():
+    df = execute_challenge()
+    elements_count(df)
+    content_validation(df)
 
-@pytest.fixture(scope="session")
-def test_all(spark_test_session):
-    print('RUNNING')
-    # spark = SparkSession.builder.master("local").appName("challenge_2").getOrCreate()
-    process_df, translation_df, client_rest_df, ccpa_df = get_dataframes(spark_test_session())
-    client_rest_df = join_and_get_ids(client_rest_df, translation_df)
-    ccpa_df = ccpa_df.withColumn('flag', lit(1))
-    ccpa_df = join_and_get_ids(ccpa_df, translation_df)
-    process_df = overwrite_flag(process_df, client_rest_df)
-    process_df = overwrite_flag(process_df, ccpa_df)
-    final_result = process_df.distinct().sort(process_df.id)
-    assert final_result.count() == 10
+
+def elements_count(df):
+    count = df.count()
+    assert count == 10, 'Expected 10 elements'
+    with pytest.raises(AssertionError):
+        assert count == 5, 'Error expected and handled'
+
+def id_assertion(val, list):
+    assert val in list
+
+
+def content_validation(df):
+    one = df.filter('flag == 1')
+    one.foreach(lambda x: id_assertion(x['id'], [1, 3, 4, 5, 9]))
