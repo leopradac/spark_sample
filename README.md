@@ -5,6 +5,9 @@
 or
 `python3 main.py`
 
+## UnitTesting
+`pytest`
+
 ## Docker Env - manual installation
 `docker run -i -t ubuntu:latest /bin/bash`
 `apt-get update`
@@ -24,10 +27,10 @@ or
 `sudo docker commit <CONTAINER_ID> ubuntu:base`
 `sudo docker run -it ubuntu:base`
 
-# spark install:
-# Java:
+### spark install:
+[Java]
 `sudo apt install curl mlocate default-jdk -y`
-# Spark:
+[Spark]
 `curl -O https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-hadoop3.2.tgz`
 `tar xvf spark-3.1.1-bin-hadoop3.2.tgz`
 `sudo mv spark-3.1.1-bin-hadoop3.2/ /opt/spark `
